@@ -6,6 +6,8 @@ module.exports = {
 		}]
 	},
 	"globals": {
-		"document": true
+		"document": true,
+		"test": true,
+		"expect": true
 	}
 };
