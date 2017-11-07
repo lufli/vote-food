@@ -1,17 +1,23 @@
 const express = require('express');
-const webpackDevMiddleware = require('webpack-dev-middleware');
-const webpack = require('webpack');
-const webpackConfig = require('../webpack.config.js');
-
-const compiler = webpack(webpackConfig);
-
 const http = require('http');
 const path = require('path');
+const bodyParser = require('body-parser');
+const morgan = require('morgan');
+const mongoose = require('mongoose');
+const cors = require('cors');
+const webpackDevMiddleware = require('webpack-dev-middleware');
+const webpack = require('webpack');
 
-const port = process.env.PORT || 3000;
+const webpackConfig = require('../webpack.config.js');
+const config = require('./config');
+
 const app = express();
-const server = http.createServer(app);
+const compiler = webpack(webpackConfig);
+mongoose.connect(config.mongoURI);
 
+app.use(morgan('combined'));
+app.use(cors());
+app.use(bodyParser.json({type: '*/*'}));
 app.use(webpackDevMiddleware(compiler, {
   hot: true,
   filename: 'bundle.js',
@@ -21,18 +27,15 @@ app.use(webpackDevMiddleware(compiler, {
   },
   historyApiFallback: true,
 }));
-// app.get('*', function(req, res) {
-//   res.status(200).send({'info': 'success'});
-// })
 
 app.get('/', (request, response) => {
   response.sendFile(path.resolve(__dirname, '..', 'build', 'index.html'));
 });
 
-app.get('/api', (request, response) => {
-  response.status(200).send({ info: 'success' });
-});
+const router = require('./router');
+router(app);
 
-server.listen(port);
-console.log('server listening on: ', port);
+const port = process.env.PORT || 3000;
+const server = http.createServer(app);
+server.listen(port, () => console.log('Server is listening on', port));
 
