@@ -1,52 +1,51 @@
 const passport = require('passport');
-const localStrategy = require('passport-local');
-const jwtStrategy = require('passport-jwt').Strategy;
-const extractJwt = require('passport-jwt').ExtractJwt;
+const LocalStrategy = require('passport-local');
+const { JwtStrategy, ExtractJwt } = require('passport-jwt');
 
 const config = require('../config');
 const User = require('../models/user');
 
 const localOptions = {
-	usernameField: 'email'
+  usernameField: 'email',
 };
 
-const localLogin = new localStrategy(localOptions, (email, password, done) => {
-	User.findOne({email}, (err, user) => {
-		if (err) {
-			return done(err);
-		}
-		if (!user) {
-			return done(null, false);
-		}
+const localLogin = new LocalStrategy(localOptions, (email, password, done) => {
+  User.findOne({ email }, (err1, user) => {
+    if (err1) {
+      return done(err1);
+    }
+    if (!user) {
+      return done(null, false);
+    }
 
-		user.comparePassword(password, (err, isMatch) => {
-			if (err) {
-				return done(err);
-			}
-			if (!isMatch) {
-				return done(null, false);
-			}
-			return done(null, user);
-		});
-	});
+    user.comparePassword(password, (err2, isMatch) => {
+      if (err2) {
+        return done(err2);
+      }
+      if (!isMatch) {
+        return done(null, false);
+      }
+      return done(null, user);
+    });
+    return undefined;
+  });
 });
 
 const jwtOptions = {
-	jwtFromRequest: extractJwt.fromHeader('authorization'),
-	secretOrKey: config.jwtSecret
+  jwtFromRequest: ExtractJwt.fromHeader('authorization'),
+  secretOrKey: config.jwtSecret,
 };
 
-const jwtLogin = new jwtStrategy(jwtOptions, (payload, done) => {
-	User.findById(payload.sub, (err, user) => {
-		if (err) {
-			return done(err, false);
-		}
-		if (user) {
-			done(null, user);
-		} else {
-			done(null, false);
-		}
-	});
+const jwtLogin = new JwtStrategy(jwtOptions, (payload, done) => {
+  User.findById(payload.sub, (err, user) => {
+    if (err) {
+      return done(err, false);
+    }
+    if (user) {
+      return done(null, user);
+    }
+    return done(null, false);
+  });
 });
 
 passport.use(jwtLogin);

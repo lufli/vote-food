@@ -17,7 +17,7 @@ mongoose.connect(config.mongoURI);
 
 app.use(morgan('combined'));
 app.use(cors());
-app.use(bodyParser.json({type: '*/*'}));
+app.use(bodyParser.json({ type: '*/*' }));
 app.use(webpackDevMiddleware(compiler, {
   hot: true,
   filename: 'bundle.js',
@@ -33,9 +33,10 @@ app.get('/', (request, response) => {
 });
 
 const router = require('./router');
+
 router(app);
 
 const port = process.env.PORT || 3000;
 const server = http.createServer(app);
-server.listen(port, () => console.log('Server is listening on', port));
+server.listen(port);
 
