@@ -5,14 +5,14 @@ import {
   Route,
 } from 'react-router-dom';
 
-import Foo from './components/foo';
+import ShowCase from './pages/show_case';
 
 function App() {
   return (
     <div>
       <Router>
         <Switch>
-          <Route exact path="/" component={Foo} />
+          <Route exact path="/" component={ShowCase} />
         </Switch>
       </Router>
     </div>
